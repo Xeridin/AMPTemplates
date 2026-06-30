@@ -68,7 +68,7 @@
     "UpdateSourcePlatform": "Linux",
     "UpdateSource": "Executable",
     "UpdateSourceData": "/bin/bash",
-    "UpdateSourceArgs": "-lc 'WINEPREFIX=\"{{$FullRootDir}}.wine\" WINEARCH=win64 WINEDEBUG=-all /usr/bin/wineboot --init'",
+    "UpdateSourceArgs": "-lc 'set -e; export WINEPREFIX=\"{{$FullRootDir}}.wine\"; export WINEARCH=win64; export WINEDEBUG=-all; command -v wineboot >/dev/null 2>&1 || { echo \"wineboot not found. Use AMP wine-stable container or install Wine.\"; exit 127; }; wineboot --init'",
     "SkipOnFailure": false
   }
 ]
