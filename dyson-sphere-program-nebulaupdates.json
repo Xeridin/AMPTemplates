@@ -20,7 +20,7 @@
     "UpdateSourcePlatform": "Linux",
     "UpdateSource": "Executable",
     "UpdateSourceData": "/bin/bash",
-    "UpdateSourceArgs": "-lc 'set -e; cd \"{{$FullBaseDir}}\"; TMP=$(mktemp -d); fetch(){ if command -v curl >/dev/null 2>&1; then curl -fsSL -o \"$2\" \"$1\"; elif command -v wget >/dev/null 2>&1; then wget -q -O \"$2\" \"$1\"; else python3 -c \"import urllib.request,sys; urllib.request.urlretrieve(sys.argv[1], sys.argv[2])\" \"$1\" \"$2\"; fi; }; fetch https://thunderstore.io/package/download/xiaoye97/BepInEx/5.4.17/ \"$TMP/bepinex.zip\"; unzip -oq \"$TMP/bepinex.zip\" -d \"$TMP/bepinex\"; if [ -d \"$TMP/bepinex/BepInExPack\" ]; then cp -rf \"$TMP/bepinex/BepInExPack/.\" .; else cp -rf \"$TMP/bepinex/.\" .; fi; rm -rf \"$TMP\"'",
+    "UpdateSourceArgs": "-c \"set -e; cd {{$FullBaseDir}}; TMP=\\$(mktemp -d); curl -fL -o \\$TMP/bepinex.zip https://thunderstore.io/package/download/xiaoye97/BepInEx/5.4.17/; unzip -oq \\$TMP/bepinex.zip -d \\$TMP/bepinex; if [ -d \\$TMP/bepinex/BepInExPack ]; then cp -rf \\$TMP/bepinex/BepInExPack/. .; else cp -rf \\$TMP/bepinex/. .; fi; rm -rf \\$TMP\"",
     "SkipOnFailure": false
   },
   {
@@ -36,7 +36,7 @@
     "UpdateSourcePlatform": "Linux",
     "UpdateSource": "Executable",
     "UpdateSourceData": "/bin/bash",
-    "UpdateSourceArgs": "-lc 'set -e; cd \"{{$FullBaseDir}}\"; mkdir -p BepInEx/plugins; TMP=$(mktemp -d); fetch(){ if command -v curl >/dev/null 2>&1; then curl -fsSL -o \"$2\" \"$1\"; elif command -v wget >/dev/null 2>&1; then wget -q -O \"$2\" \"$1\"; else python3 -c \"import urllib.request,sys; urllib.request.urlretrieve(sys.argv[1], sys.argv[2])\" \"$1\" \"$2\"; fi; }; fetch https://thunderstore.io/package/download/nebula/NebulaMultiplayerModApi/2.1.0/ \"$TMP/api.zip\"; unzip -oq \"$TMP/api.zip\" -d \"$TMP/api\"; cp -rf \"$TMP/api/plugins/.\" BepInEx/plugins/; rm -rf \"$TMP\"'",
+    "UpdateSourceArgs": "-c \"set -e; cd {{$FullBaseDir}}; mkdir -p BepInEx/plugins; TMP=\\$(mktemp -d); curl -fL -o \\$TMP/api.zip https://thunderstore.io/package/download/nebula/NebulaMultiplayerModApi/2.1.0/; unzip -oq \\$TMP/api.zip -d \\$TMP/api; cp -rf \\$TMP/api/plugins/. BepInEx/plugins/; rm -rf \\$TMP\"",
     "SkipOnFailure": false
   },
   {
@@ -52,7 +52,7 @@
     "UpdateSourcePlatform": "Linux",
     "UpdateSource": "Executable",
     "UpdateSourceData": "/bin/bash",
-    "UpdateSourceArgs": "-lc 'set -e; cd \"{{$FullBaseDir}}\"; mkdir -p BepInEx/plugins; TMP=$(mktemp -d); fetch(){ if command -v curl >/dev/null 2>&1; then curl -fsSL -o \"$2\" \"$1\"; elif command -v wget >/dev/null 2>&1; then wget -q -O \"$2\" \"$1\"; else python3 -c \"import urllib.request,sys; urllib.request.urlretrieve(sys.argv[1], sys.argv[2])\" \"$1\" \"$2\"; fi; }; fetch https://thunderstore.io/package/download/nebula/NebulaMultiplayerMod/0.9.16/ \"$TMP/nebula.zip\"; unzip -oq \"$TMP/nebula.zip\" -d \"$TMP/nebula\"; cp -rf \"$TMP/nebula/plugins/.\" BepInEx/plugins/; rm -rf \"$TMP\"'",
+    "UpdateSourceArgs": "-c \"set -e; cd {{$FullBaseDir}}; mkdir -p BepInEx/plugins; TMP=\\$(mktemp -d); curl -fL -o \\$TMP/nebula.zip https://thunderstore.io/package/download/nebula/NebulaMultiplayerMod/0.9.16/; unzip -oq \\$TMP/nebula.zip -d \\$TMP/nebula; cp -rf \\$TMP/nebula/plugins/. BepInEx/plugins/; rm -rf \\$TMP\"",
     "SkipOnFailure": false
   },
   {
@@ -68,7 +68,7 @@
     "UpdateSourcePlatform": "Linux",
     "UpdateSource": "Executable",
     "UpdateSourceData": "/bin/bash",
-    "UpdateSourceArgs": "-lc 'set -e; export WINEPREFIX=\"{{$FullRootDir}}.wine\"; export WINEARCH=win64; export WINEDEBUG=-all; command -v wineboot >/dev/null 2>&1 || { echo \"wineboot not found. Use AMP wine-stable container or install Wine.\"; exit 127; }; wineboot --init'",
+    "UpdateSourceArgs": "-c \"set -e; export WINEPREFIX={{$FullRootDir}}.wine; export WINEARCH=win64; export WINEDEBUG=-all; command -v wineboot >/dev/null 2>&1 || { echo Wine not found. Use AMP wine-stable container or install Wine.; exit 127; }; wineboot --init\"",
     "SkipOnFailure": false
   }
 ]
