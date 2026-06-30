@@ -1,9 +1,9 @@
 {
-  "id": "b5f5a5f6-7e79-4f2f-9e4a-77b9a574dd74",
-  "authors": ["Matthew Haley", "Xeridin"],
+  "id": "7dfe35bd-6a5e-4c89-a399-50a29c5852d8",
+  "authors": ["Xeridin", "ChatGPT"],
   "origin": "https://github.com/Xeridin/AMPTemplates.git",
   "url": "https://github.com/Xeridin/AMPTemplates",
   "imagefile": "",
-  "prefix": "Xeridin",
+  "prefix": "xeridin",
   "repotype": "AppTemplates"
 }

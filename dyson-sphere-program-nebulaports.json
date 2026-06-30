@@ -1,9 +1,9 @@
 [
-    {
-        "Protocol": "TCP",
-        "Port": 8469,
-        "Ref": "ServerPort",
-        "Name": "Nebula Server Port",
-        "Description": "Default Nebula direct connection port. Forward TCP 8469 to this AMP instance."
-    }
+  {
+    "Protocol": "TCP",
+    "Port": 8469,
+    "Ref": "ServerPort",
+    "Name": "Nebula Server Port",
+    "Description": "Default TCP port used by Nebula multiplayer hosts"
+  }
 ]

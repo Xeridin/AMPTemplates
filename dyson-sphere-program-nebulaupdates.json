@@ -1,78 +1,74 @@
 [
-    {
-        "UpdateStageName": "DSP Steam Download",
-        "UpdateSourcePlatform": "All",
-        "UpdateSource": "SteamCMD",
-        "UpdateSourceData": "1366540",
-        "UpdateSourceArgs": "1366540",
-        "ForceDownloadPlatform": "Windows",
-        "SkipOnFailure": false
-    },
-    {
-        "UpdateStageName": "Create BepInEx Plugins Directory",
-        "UpdateSourcePlatform": "All",
-        "UpdateSource": "CreateDirectory",
-        "UpdateSourceArgs": "{{$FullBaseDir}}BepInEx/plugins",
-        "SkipOnFailure": false
-    },
-    {
-        "UpdateStageName": "BepInExPack Download",
-        "UpdateSourcePlatform": "All",
-        "UpdateSource": "FetchURL",
-        "UpdateSourceData": "https://thunderstore.io/package/download/BepInEx/BepInExPack/5.4.2100/",
-        "UpdateSourceTarget": "{{$FullBaseDir}}_ampdownloads",
-        "UpdateSourceArgs": "BepInExPack.zip",
-        "UnzipUpdateSource": true,
-        "OverwriteExistingFiles": true,
-        "DeleteAfterExtract": false,
-        "SkipOnFailure": false
-    },
-    {
-        "UpdateStageName": "BepInExPack Install",
-        "UpdateSourcePlatform": "Linux",
-        "UpdateSource": "Executable",
-        "UpdateSourceData": "/bin/bash",
-        "UpdateSourceArgs": "-c \"cd '{{$FullBaseDir}}' && if [ -d _ampdownloads/BepInExPack ]; then cp -R _ampdownloads/BepInExPack/. .; fi\"",
-        "SkipOnFailure": false
-    },
-    {
-        "UpdateStageName": "BepInExPack Install",
-        "UpdateSourcePlatform": "Windows",
-        "UpdateSource": "Executable",
-        "UpdateSourceData": "powershell.exe",
-        "UpdateSourceArgs": "-NoProfile -Command \"$b='{{$FullBaseDir}}'; if (Test-Path ($b + '_ampdownloads\\BepInExPack')) { Copy-Item ($b + '_ampdownloads\\BepInExPack\\*') $b -Recurse -Force }\"",
-        "SkipOnFailure": false
-    },
-    {
-        "UpdateStageName": "Nebula API Download",
-        "UpdateSourcePlatform": "All",
-        "UpdateSource": "FetchURL",
-        "UpdateSourceData": "https://thunderstore.io/package/download/nebula/NebulaMultiplayerModApi/2.0.0/",
-        "UpdateSourceTarget": "{{$FullBaseDir}}BepInEx/plugins",
-        "UpdateSourceArgs": "NebulaMultiplayerModApi.zip",
-        "UnzipUpdateSource": true,
-        "OverwriteExistingFiles": true,
-        "DeleteAfterExtract": true,
-        "SkipOnFailure": false
-    },
-    {
-        "UpdateStageName": "Nebula Multiplayer Mod Download",
-        "UpdateSourcePlatform": "All",
-        "UpdateSource": "FetchURL",
-        "UpdateSourceData": "https://thunderstore.io/package/download/nebula/NebulaMultiplayerMod/0.9.22/",
-        "UpdateSourceTarget": "{{$FullBaseDir}}BepInEx/plugins",
-        "UpdateSourceArgs": "NebulaMultiplayerMod.zip",
-        "UnzipUpdateSource": true,
-        "OverwriteExistingFiles": true,
-        "DeleteAfterExtract": true,
-        "SkipOnFailure": false
-    },
-    {
-        "UpdateStageName": "Initialise Wine",
-        "UpdateSourcePlatform": "Linux",
-        "UpdateSource": "Executable",
-        "UpdateSourceData": "/bin/bash",
-        "UpdateSourceArgs": "-c \"WINEPREFIX='{{$FullRootDir}}.wine' WINEARCH=win64 WINEDEBUG=-all /usr/bin/wineboot --init >/dev/null 2>&1 || true\"",
-        "SkipOnFailure": true
-    }
+  {
+    "UpdateStageName": "Dyson Sphere Program Download",
+    "UpdateSourcePlatform": "All",
+    "UpdateSource": "SteamCMD",
+    "UpdateSourceData": "1366540",
+    "UpdateSourceArgs": "1366540",
+    "ForceDownloadPlatform": "Windows",
+    "SkipOnFailure": false
+  },
+  {
+    "UpdateStageName": "Create Mod Directories",
+    "UpdateSourcePlatform": "All",
+    "UpdateSource": "CreateDirectory",
+    "UpdateSourceArgs": "{{$FullBaseDir}}BepInEx/plugins",
+    "SkipOnFailure": false
+  },
+  {
+    "UpdateStageName": "Install/Update BepInEx",
+    "UpdateSourcePlatform": "Linux",
+    "UpdateSource": "Executable",
+    "UpdateSourceData": "/bin/bash",
+    "UpdateSourceArgs": "-lc 'set -e; cd \"{{$FullBaseDir}}\"; TMP=$(mktemp -d); fetch(){ if command -v curl >/dev/null 2>&1; then curl -fsSL -o \"$2\" \"$1\"; elif command -v wget >/dev/null 2>&1; then wget -q -O \"$2\" \"$1\"; else python3 -c \"import urllib.request,sys; urllib.request.urlretrieve(sys.argv[1], sys.argv[2])\" \"$1\" \"$2\"; fi; }; fetch https://thunderstore.io/package/download/xiaoye97/BepInEx/5.4.17/ \"$TMP/bepinex.zip\"; unzip -oq \"$TMP/bepinex.zip\" -d \"$TMP/bepinex\"; if [ -d \"$TMP/bepinex/BepInExPack\" ]; then cp -rf \"$TMP/bepinex/BepInExPack/.\" .; else cp -rf \"$TMP/bepinex/.\" .; fi; rm -rf \"$TMP\"'",
+    "SkipOnFailure": false
+  },
+  {
+    "UpdateStageName": "Install/Update BepInEx",
+    "UpdateSourcePlatform": "Windows",
+    "UpdateSource": "Executable",
+    "UpdateSourceData": "powershell.exe",
+    "UpdateSourceArgs": "-NoProfile -ExecutionPolicy Bypass -Command \"$ErrorActionPreference='Stop'; Set-Location '{{%FullBaseDir%}}'; $tmp=New-Item -ItemType Directory -Force ([IO.Path]::Combine([IO.Path]::GetTempPath(),'dspbepinex')); Invoke-WebRequest -Uri 'https://thunderstore.io/package/download/xiaoye97/BepInEx/5.4.17/' -OutFile ($tmp.FullName + '\\bepinex.zip'); Expand-Archive -Force ($tmp.FullName + '\\bepinex.zip') ($tmp.FullName + '\\bepinex'); $src=$tmp.FullName + '\\bepinex\\BepInExPack'; if (!(Test-Path $src)) { $src=$tmp.FullName + '\\bepinex' }; Copy-Item -Recurse -Force ($src + '\\*') .; Remove-Item -Recurse -Force $tmp.FullName\"",
+    "SkipOnFailure": false
+  },
+  {
+    "UpdateStageName": "Install/Update Nebula API",
+    "UpdateSourcePlatform": "Linux",
+    "UpdateSource": "Executable",
+    "UpdateSourceData": "/bin/bash",
+    "UpdateSourceArgs": "-lc 'set -e; cd \"{{$FullBaseDir}}\"; mkdir -p BepInEx/plugins; TMP=$(mktemp -d); fetch(){ if command -v curl >/dev/null 2>&1; then curl -fsSL -o \"$2\" \"$1\"; elif command -v wget >/dev/null 2>&1; then wget -q -O \"$2\" \"$1\"; else python3 -c \"import urllib.request,sys; urllib.request.urlretrieve(sys.argv[1], sys.argv[2])\" \"$1\" \"$2\"; fi; }; fetch https://thunderstore.io/package/download/nebula/NebulaMultiplayerModApi/2.1.0/ \"$TMP/api.zip\"; unzip -oq \"$TMP/api.zip\" -d \"$TMP/api\"; cp -rf \"$TMP/api/plugins/.\" BepInEx/plugins/; rm -rf \"$TMP\"'",
+    "SkipOnFailure": false
+  },
+  {
+    "UpdateStageName": "Install/Update Nebula API",
+    "UpdateSourcePlatform": "Windows",
+    "UpdateSource": "Executable",
+    "UpdateSourceData": "powershell.exe",
+    "UpdateSourceArgs": "-NoProfile -ExecutionPolicy Bypass -Command \"$ErrorActionPreference='Stop'; Set-Location '{{%FullBaseDir%}}'; New-Item -ItemType Directory -Force 'BepInEx\\plugins' | Out-Null; $tmp=New-Item -ItemType Directory -Force ([IO.Path]::Combine([IO.Path]::GetTempPath(),'dspnebapi')); Invoke-WebRequest -Uri 'https://thunderstore.io/package/download/nebula/NebulaMultiplayerModApi/2.1.0/' -OutFile ($tmp.FullName + '\\api.zip'); Expand-Archive -Force ($tmp.FullName + '\\api.zip') ($tmp.FullName + '\\api'); Copy-Item -Recurse -Force ($tmp.FullName + '\\api\\plugins\\*') 'BepInEx\\plugins\\'; Remove-Item -Recurse -Force $tmp.FullName\"",
+    "SkipOnFailure": false
+  },
+  {
+    "UpdateStageName": "Install/Update Nebula Mod",
+    "UpdateSourcePlatform": "Linux",
+    "UpdateSource": "Executable",
+    "UpdateSourceData": "/bin/bash",
+    "UpdateSourceArgs": "-lc 'set -e; cd \"{{$FullBaseDir}}\"; mkdir -p BepInEx/plugins; TMP=$(mktemp -d); fetch(){ if command -v curl >/dev/null 2>&1; then curl -fsSL -o \"$2\" \"$1\"; elif command -v wget >/dev/null 2>&1; then wget -q -O \"$2\" \"$1\"; else python3 -c \"import urllib.request,sys; urllib.request.urlretrieve(sys.argv[1], sys.argv[2])\" \"$1\" \"$2\"; fi; }; fetch https://thunderstore.io/package/download/nebula/NebulaMultiplayerMod/0.9.16/ \"$TMP/nebula.zip\"; unzip -oq \"$TMP/nebula.zip\" -d \"$TMP/nebula\"; cp -rf \"$TMP/nebula/plugins/.\" BepInEx/plugins/; rm -rf \"$TMP\"'",
+    "SkipOnFailure": false
+  },
+  {
+    "UpdateStageName": "Install/Update Nebula Mod",
+    "UpdateSourcePlatform": "Windows",
+    "UpdateSource": "Executable",
+    "UpdateSourceData": "powershell.exe",
+    "UpdateSourceArgs": "-NoProfile -ExecutionPolicy Bypass -Command \"$ErrorActionPreference='Stop'; Set-Location '{{%FullBaseDir%}}'; New-Item -ItemType Directory -Force 'BepInEx\\plugins' | Out-Null; $tmp=New-Item -ItemType Directory -Force ([IO.Path]::Combine([IO.Path]::GetTempPath(),'dspnebula')); Invoke-WebRequest -Uri 'https://thunderstore.io/package/download/nebula/NebulaMultiplayerMod/0.9.16/' -OutFile ($tmp.FullName + '\\nebula.zip'); Expand-Archive -Force ($tmp.FullName + '\\nebula.zip') ($tmp.FullName + '\\nebula'); Copy-Item -Recurse -Force ($tmp.FullName + '\\nebula\\plugins\\*') 'BepInEx\\plugins\\'; Remove-Item -Recurse -Force $tmp.FullName\"",
+    "SkipOnFailure": false
+  },
+  {
+    "UpdateStageName": "Initialise Wine",
+    "UpdateSourcePlatform": "Linux",
+    "UpdateSource": "Executable",
+    "UpdateSourceData": "/bin/bash",
+    "UpdateSourceArgs": "-lc 'WINEPREFIX=\"{{$FullRootDir}}.wine\" WINEARCH=win64 WINEDEBUG=-all /usr/bin/wineboot --init'",
+    "SkipOnFailure": false
+  }
 ]
