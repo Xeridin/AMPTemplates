@@ -1,0 +1,78 @@
+[
+    {
+        "UpdateStageName": "DSP Steam Download",
+        "UpdateSourcePlatform": "All",
+        "UpdateSource": "SteamCMD",
+        "UpdateSourceData": "1366540",
+        "UpdateSourceArgs": "1366540",
+        "ForceDownloadPlatform": "Windows",
+        "SkipOnFailure": false
+    },
+    {
+        "UpdateStageName": "Create BepInEx Plugins Directory",
+        "UpdateSourcePlatform": "All",
+        "UpdateSource": "CreateDirectory",
+        "UpdateSourceArgs": "{{$FullBaseDir}}BepInEx/plugins",
+        "SkipOnFailure": false
+    },
+    {
+        "UpdateStageName": "BepInExPack Download",
+        "UpdateSourcePlatform": "All",
+        "UpdateSource": "FetchURL",
+        "UpdateSourceData": "https://thunderstore.io/package/download/BepInEx/BepInExPack/5.4.2100/",
+        "UpdateSourceTarget": "{{$FullBaseDir}}_ampdownloads",
+        "UpdateSourceArgs": "BepInExPack.zip",
+        "UnzipUpdateSource": true,
+        "OverwriteExistingFiles": true,
+        "DeleteAfterExtract": false,
+        "SkipOnFailure": false
+    },
+    {
+        "UpdateStageName": "BepInExPack Install",
+        "UpdateSourcePlatform": "Linux",
+        "UpdateSource": "Executable",
+        "UpdateSourceData": "/bin/bash",
+        "UpdateSourceArgs": "-c \"cd '{{$FullBaseDir}}' && if [ -d _ampdownloads/BepInExPack ]; then cp -R _ampdownloads/BepInExPack/. .; fi\"",
+        "SkipOnFailure": false
+    },
+    {
+        "UpdateStageName": "BepInExPack Install",
+        "UpdateSourcePlatform": "Windows",
+        "UpdateSource": "Executable",
+        "UpdateSourceData": "powershell.exe",
+        "UpdateSourceArgs": "-NoProfile -Command \"$b='{{$FullBaseDir}}'; if (Test-Path ($b + '_ampdownloads\\BepInExPack')) { Copy-Item ($b + '_ampdownloads\\BepInExPack\\*') $b -Recurse -Force }\"",
+        "SkipOnFailure": false
+    },
+    {
+        "UpdateStageName": "Nebula API Download",
+        "UpdateSourcePlatform": "All",
+        "UpdateSource": "FetchURL",
+        "UpdateSourceData": "https://thunderstore.io/package/download/nebula/NebulaMultiplayerModApi/2.0.0/",
+        "UpdateSourceTarget": "{{$FullBaseDir}}BepInEx/plugins",
+        "UpdateSourceArgs": "NebulaMultiplayerModApi.zip",
+        "UnzipUpdateSource": true,
+        "OverwriteExistingFiles": true,
+        "DeleteAfterExtract": true,
+        "SkipOnFailure": false
+    },
+    {
+        "UpdateStageName": "Nebula Multiplayer Mod Download",
+        "UpdateSourcePlatform": "All",
+        "UpdateSource": "FetchURL",
+        "UpdateSourceData": "https://thunderstore.io/package/download/nebula/NebulaMultiplayerMod/0.9.22/",
+        "UpdateSourceTarget": "{{$FullBaseDir}}BepInEx/plugins",
+        "UpdateSourceArgs": "NebulaMultiplayerMod.zip",
+        "UnzipUpdateSource": true,
+        "OverwriteExistingFiles": true,
+        "DeleteAfterExtract": true,
+        "SkipOnFailure": false
+    },
+    {
+        "UpdateStageName": "Initialise Wine",
+        "UpdateSourcePlatform": "Linux",
+        "UpdateSource": "Executable",
+        "UpdateSourceData": "/bin/bash",
+        "UpdateSourceArgs": "-c \"WINEPREFIX='{{$FullRootDir}}.wine' WINEARCH=win64 WINEDEBUG=-all /usr/bin/wineboot --init >/dev/null 2>&1 || true\"",
+        "SkipOnFailure": true
+    }
+]

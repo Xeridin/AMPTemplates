@@ -1,0 +1,59 @@
+[
+    {
+        "DisplayName": "Save Launch Mode",
+        "Category": "Dyson Sphere Program - Nebula:stadia_controller",
+        "Subcategory": "Server:dns:1",
+        "Description": "Choose how Nebula headless should load a save. The named save mode launches with: -load <save name>.",
+        "Keywords": "save,load,latest,nebula,headless",
+        "FieldName": "SaveLaunchArg",
+        "InputType": "enum",
+        "ParamFieldName": "SaveLaunchArg",
+        "DefaultValue": "-load {{SaveName}}",
+        "EnumValues": {
+            "-load {{SaveName}}": "Load named save",
+            "-load-latest": "Load latest save",
+            "": "Do not pass a save argument"
+        }
+    },
+    {
+        "DisplayName": "Save Name",
+        "Category": "Dyson Sphere Program - Nebula:stadia_controller",
+        "Subcategory": "Server:dns:1",
+        "Description": "Name of the DSP save to load when Save Launch Mode is set to Load named save. Do not include a file extension unless Nebula expects it for your save.",
+        "Keywords": "save,name",
+        "FieldName": "SaveName",
+        "InputType": "text",
+        "ParamFieldName": "SaveName",
+        "DefaultValue": "save1",
+        "Placeholder": "save1",
+        "EnumValues": {}
+    },
+    {
+        "DisplayName": "Custom Arguments",
+        "Category": "Dyson Sphere Program - Nebula:stadia_controller",
+        "Subcategory": "Server:dns:1",
+        "Description": "Extra command-line arguments appended after the Nebula headless launch flags.",
+        "Keywords": "custom,args,arguments",
+        "FieldName": "CustomArgs",
+        "InputType": "text",
+        "ParamFieldName": "CustomArgs",
+        "DefaultValue": "",
+        "Placeholder": "",
+        "EnumValues": {}
+    },
+    {
+        "DisplayName": "Player Limit",
+        "Category": "Dyson Sphere Program - Nebula:stadia_controller",
+        "Subcategory": "Server:dns:1",
+        "Description": "For AMP display/slot tracking only. Nebula does not currently use this value from the AMP command line.",
+        "Keywords": "players,max",
+        "FieldName": "$MaxUsers",
+        "InputType": "number",
+        "MinValue": "1",
+        "MaxValue": "32",
+        "ParamFieldName": "MaxUsers",
+        "DefaultValue": "10",
+        "Suffix": "players",
+        "EnumValues": {}
+    }
+]
