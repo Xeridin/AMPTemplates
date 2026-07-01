@@ -13,7 +13,7 @@ mkdir -p "$BASE_DIR"
 cd "$BASE_DIR"
 mkdir -p BepInEx/plugins
 
-THUNDERSTORE_API="https://thunderstore.io/api/experimental/package"
+THUNDERSTORE_API="https://thunderstore.io/c/dyson-sphere-program/api/v1/package/"
 ROOT_PACKAGE_NAMESPACE="nebula"
 ROOT_PACKAGE_NAME="NebulaMultiplayerMod"
 
@@ -58,36 +58,35 @@ PY
   fi
 }
 
-package_api_url() {
-  local namespace="$1"
-  local package="$2"
-  echo "$THUNDERSTORE_API/$namespace/$package/"
-}
-
-get_latest_package_info() {
-  local namespace="$1"
-  local package="$2"
-  local output="$3"
-  download "$(package_api_url "$namespace" "$package")" "$output"
-}
-
-parse_latest_package_json() {
-  local json_file="$1"
-  local output_file="$2"
-  python3 - "$json_file" "$output_file" <<'PY'
+find_package_in_index() {
+  local index_file="$1"
+  local namespace="$2"
+  local package="$3"
+  local output_file="$4"
+  python3 - "$index_file" "$namespace" "$package" "$output_file" <<'PY'
 import json
 import sys
 
-with open(sys.argv[1], 'r', encoding='utf-8') as f:
+index_file, namespace, package, output_file = sys.argv[1:5]
+with open(index_file, 'r', encoding='utf-8') as f:
     data = json.load(f)
 
-versions = data.get('versions') or []
+match = None
+for item in data:
+    if item.get('owner') == namespace and item.get('name') == package:
+        match = item
+        break
+
+if match is None:
+    raise SystemExit(f'Package not found in Thunderstore index: {namespace}/{package}')
+
+versions = match.get('versions') or []
 if not versions:
-    raise SystemExit('Package has no versions')
+    raise SystemExit(f'Package has no versions: {namespace}/{package}')
 
 version = versions[0]
-print('download_url=' + version['download_url'], file=open(sys.argv[2], 'w', encoding='utf-8'))
-with open(sys.argv[2], 'a', encoding='utf-8') as out:
+with open(output_file, 'w', encoding='utf-8') as out:
+    print('download_url=' + version['download_url'], file=out)
     print('version_number=' + version.get('version_number', ''), file=out)
     for dep in version.get('dependencies') or []:
         print('dependency=' + dep, file=out)
@@ -175,8 +174,7 @@ install_package_latest() {
   mkdir -p "$pkg_tmp"
 
   echo "Resolving Thunderstore package $namespace/$package..."
-  get_latest_package_info "$namespace" "$package" "$pkg_tmp/package.json"
-  parse_latest_package_json "$pkg_tmp/package.json" "$pkg_tmp/package.env"
+  find_package_in_index "$PACKAGE_INDEX" "$namespace" "$package" "$pkg_tmp/package.env"
 
   local download_url=""
   local version_number=""
@@ -204,6 +202,10 @@ fi
 
 TMP_DIR="$(mktemp -d)"
 trap 'rm -rf "$TMP_DIR"' EXIT
+
+PACKAGE_INDEX="$TMP_DIR/thunderstore-packages.json"
+echo "Downloading Thunderstore Dyson Sphere Program package index..."
+download "$THUNDERSTORE_API" "$PACKAGE_INDEX"
 
 echo "Installing latest Nebula Multiplayer Mod and dependencies from Thunderstore..."
 install_package_latest "$ROOT_PACKAGE_NAMESPACE" "$ROOT_PACKAGE_NAME"
