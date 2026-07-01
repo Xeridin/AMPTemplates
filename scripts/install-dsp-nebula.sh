@@ -13,9 +13,11 @@ mkdir -p "$BASE_DIR"
 cd "$BASE_DIR"
 mkdir -p BepInEx/plugins
 
-BEPINEX_URL="https://thunderstore.io/package/download/xiaoye97/BepInEx/5.4.17/"
-NEBULA_API_URL="https://thunderstore.io/package/download/nebula/NebulaMultiplayerModApi/2.1.0/"
-NEBULA_MOD_URL="https://thunderstore.io/package/download/nebula/NebulaMultiplayerMod/0.9.22/"
+THUNDERSTORE_API="https://thunderstore.io/api/experimental/package"
+ROOT_PACKAGE_NAMESPACE="nebula"
+ROOT_PACKAGE_NAME="NebulaMultiplayerMod"
+
+declare -A INSTALLED_PACKAGES
 
 download() {
   local url="$1"
@@ -56,38 +58,78 @@ PY
   fi
 }
 
-install_bepinex() {
-  local tmp="$1/bepinex"
-  mkdir -p "$tmp"
-  download "$BEPINEX_URL" "$tmp/bepinex.zip"
-  extract_zip "$tmp/bepinex.zip" "$tmp/extract"
-
-  if [[ -d "$tmp/extract/BepInExPack" ]]; then
-    cp -a "$tmp/extract/BepInExPack/." "$BASE_DIR/"
-  elif [[ -d "$tmp/extract/BepInEx" ]]; then
-    cp -a "$tmp/extract/." "$BASE_DIR/"
-  else
-    echo "Could not identify BepInEx package layout." >&2
-    find "$tmp/extract" -maxdepth 3 -print >&2 || true
-    exit 66
-  fi
+package_api_url() {
+  local namespace="$1"
+  local package="$2"
+  echo "$THUNDERSTORE_API/$namespace/$package/"
 }
 
-install_plugin_pack() {
-  local name="$1"
-  local url="$2"
-  local tmp="$3/$name"
-  mkdir -p "$tmp"
+get_latest_package_info() {
+  local namespace="$1"
+  local package="$2"
+  local output="$3"
+  download "$(package_api_url "$namespace" "$package")" "$output"
+}
 
-  download "$url" "$tmp/$name.zip"
-  extract_zip "$tmp/$name.zip" "$tmp/extract"
+parse_latest_package_json() {
+  local json_file="$1"
+  local output_file="$2"
+  python3 - "$json_file" "$output_file" <<'PY'
+import json
+import sys
 
-  if [[ -d "$tmp/extract/plugins" ]]; then
-    cp -a "$tmp/extract/plugins/." "$BASE_DIR/BepInEx/plugins/"
-  elif [[ -d "$tmp/extract/BepInEx/plugins" ]]; then
-    cp -a "$tmp/extract/BepInEx/plugins/." "$BASE_DIR/BepInEx/plugins/"
+with open(sys.argv[1], 'r', encoding='utf-8') as f:
+    data = json.load(f)
+
+versions = data.get('versions') or []
+if not versions:
+    raise SystemExit('Package has no versions')
+
+version = versions[0]
+print('download_url=' + version['download_url'], file=open(sys.argv[2], 'w', encoding='utf-8'))
+with open(sys.argv[2], 'a', encoding='utf-8') as out:
+    print('version_number=' + version.get('version_number', ''), file=out)
+    for dep in version.get('dependencies') or []:
+        print('dependency=' + dep, file=out)
+PY
+}
+
+split_dependency() {
+  local dep="$1"
+  python3 - "$dep" <<'PY'
+import sys
+s = sys.argv[1]
+parts = s.rsplit('-', 1)
+if len(parts) != 2:
+    raise SystemExit(f'Invalid dependency string: {s}')
+left, version = parts
+parts2 = left.split('-', 1)
+if len(parts2) != 2:
+    raise SystemExit(f'Invalid dependency string: {s}')
+print(parts2[0])
+print(parts2[1])
+print(version)
+PY
+}
+
+copy_package_payload() {
+  local extract_dir="$1"
+  local package_label="$2"
+
+  if [[ -d "$extract_dir/BepInExPack" ]]; then
+    echo "Installing BepInEx pack from $package_label"
+    cp -a "$extract_dir/BepInExPack/." "$BASE_DIR/"
+    return
+  fi
+
+  if [[ -d "$extract_dir/BepInEx/plugins" ]]; then
+    echo "Installing BepInEx plugins from $package_label"
+    cp -a "$extract_dir/BepInEx/plugins/." "$BASE_DIR/BepInEx/plugins/"
+  elif [[ -d "$extract_dir/plugins" ]]; then
+    echo "Installing plugins from $package_label"
+    cp -a "$extract_dir/plugins/." "$BASE_DIR/BepInEx/plugins/"
   else
-    mapfile -t payload_files < <(find "$tmp/extract" -type f \
+    mapfile -t payload_files < <(find "$extract_dir" -type f \
       ! -iname 'manifest.json' \
       ! -iname 'icon.png' \
       ! -iname 'README.md' \
@@ -95,30 +137,76 @@ install_plugin_pack() {
       ! -iname '*.txt' \
       ! -iname '*.md')
 
-    if (( ${#payload_files[@]} == 0 )); then
-      echo "Could not find plugin payload files in $name package." >&2
-      find "$tmp/extract" -maxdepth 4 -print >&2 || true
-      exit 65
+    if (( ${#payload_files[@]} > 0 )); then
+      echo "No plugins directory found in $package_label; copying payload files directly into BepInEx/plugins."
+      for file in "${payload_files[@]}"; do
+        cp -a "$file" "$BASE_DIR/BepInEx/plugins/"
+      done
     fi
+  fi
 
-    echo "No plugins directory found in $name package; copying payload files directly into BepInEx/plugins."
-    for file in "${payload_files[@]}"; do
-      cp -a "$file" "$BASE_DIR/BepInEx/plugins/"
-    done
+  if [[ -d "$extract_dir/BepInEx/config" ]]; then
+    mkdir -p "$BASE_DIR/BepInEx/config"
+    cp -a "$extract_dir/BepInEx/config/." "$BASE_DIR/BepInEx/config/"
+  fi
+
+  if [[ -d "$extract_dir/patchers" ]]; then
+    mkdir -p "$BASE_DIR/BepInEx/patchers"
+    cp -a "$extract_dir/patchers/." "$BASE_DIR/BepInEx/patchers/"
+  fi
+
+  if [[ -d "$extract_dir/BepInEx/patchers" ]]; then
+    mkdir -p "$BASE_DIR/BepInEx/patchers"
+    cp -a "$extract_dir/BepInEx/patchers/." "$BASE_DIR/BepInEx/patchers/"
   fi
 }
+
+install_package_latest() {
+  local namespace="$1"
+  local package="$2"
+  local key="$namespace-$package"
+
+  if [[ -n "${INSTALLED_PACKAGES[$key]:-}" ]]; then
+    return
+  fi
+  INSTALLED_PACKAGES[$key]=1
+
+  local pkg_tmp="$TMP_DIR/$key"
+  mkdir -p "$pkg_tmp"
+
+  echo "Resolving Thunderstore package $namespace/$package..."
+  get_latest_package_info "$namespace" "$package" "$pkg_tmp/package.json"
+  parse_latest_package_json "$pkg_tmp/package.json" "$pkg_tmp/package.env"
+
+  local download_url=""
+  local version_number=""
+  mapfile -t dependencies < <(awk -F= '/^dependency=/{print $2}' "$pkg_tmp/package.env")
+  download_url="$(awk -F= '/^download_url=/{print $2; exit}' "$pkg_tmp/package.env")"
+  version_number="$(awk -F= '/^version_number=/{print $2; exit}' "$pkg_tmp/package.env")"
+
+  for dep in "${dependencies[@]}"; do
+    mapfile -t dep_parts < <(split_dependency "$dep")
+    local dep_namespace="${dep_parts[0]}"
+    local dep_package="${dep_parts[1]}"
+    install_package_latest "$dep_namespace" "$dep_package"
+  done
+
+  echo "Installing $namespace/$package $version_number..."
+  download "$download_url" "$pkg_tmp/package.zip"
+  extract_zip "$pkg_tmp/package.zip" "$pkg_tmp/extract"
+  copy_package_payload "$pkg_tmp/extract" "$namespace/$package $version_number"
+}
+
+if ! command -v python3 >/dev/null 2>&1; then
+  echo "python3 is required for Thunderstore API parsing." >&2
+  exit 127
+fi
 
 TMP_DIR="$(mktemp -d)"
 trap 'rm -rf "$TMP_DIR"' EXIT
 
-echo "Installing BepInEx 5.4.17..."
-install_bepinex "$TMP_DIR"
-
-echo "Installing Nebula Multiplayer Mod API 2.1.0..."
-install_plugin_pack "nebula-api" "$NEBULA_API_URL" "$TMP_DIR"
-
-echo "Installing Nebula Multiplayer Mod 0.9.22..."
-install_plugin_pack "nebula-mod" "$NEBULA_MOD_URL" "$TMP_DIR"
+echo "Installing latest Nebula Multiplayer Mod and dependencies from Thunderstore..."
+install_package_latest "$ROOT_PACKAGE_NAMESPACE" "$ROOT_PACKAGE_NAME"
 
 if [[ -n "$ROOT_DIR" ]]; then
   export WINEPREFIX="${ROOT_DIR}.wine"
