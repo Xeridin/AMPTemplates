@@ -12,8 +12,8 @@
     "UpdateStageName": "Download Linux Nebula Installer",
     "UpdateSourcePlatform": "Linux",
     "UpdateSource": "FetchURL",
-    "UpdateSourceData": "https://raw.githubusercontent.com/Xeridin/AMPTemplates/main/scripts/install-dsp-nebula.sh",
-    "UpdateSourceArgs": "install-dsp-nebula.sh",
+    "UpdateSourceData": "https://raw.githubusercontent.com/Xeridin/AMPTemplates/main/scripts/install-dsp-nebula.sh?v=ea6dd3105730b4fdccdb567636412d0a907de19a",
+    "UpdateSourceArgs": "install-dsp-nebula-v2.sh",
     "UpdateSourceTarget": "{{$FullRootDir}}",
     "OverwriteExistingFiles": true,
     "SkipOnFailure": false
@@ -23,15 +23,7 @@
     "UpdateSourcePlatform": "Linux",
     "UpdateSource": "Executable",
     "UpdateSourceData": "/bin/bash",
-    "UpdateSourceArgs": "{{$FullRootDir}}install-dsp-nebula.sh {{$FullBaseDir}} {{$FullRootDir}}",
-    "SkipOnFailure": false
-  },
-  {
-    "UpdateStageName": "Install/Update Nebula Dependencies",
-    "UpdateSourcePlatform": "Windows",
-    "UpdateSource": "Executable",
-    "UpdateSourceData": "powershell.exe",
-    "UpdateSourceArgs": "-NoProfile -ExecutionPolicy Bypass -Command \"$ErrorActionPreference='Stop'; Set-Location '{{%FullBaseDir%}}'; New-Item -ItemType Directory -Force 'BepInEx\\plugins' | Out-Null; $tmp=New-Item -ItemType Directory -Force ([IO.Path]::Combine([IO.Path]::GetTempPath(),'dspnebula')); Invoke-WebRequest -Uri 'https://thunderstore.io/package/download/xiaoye97/BepInEx/5.4.17/' -OutFile ($tmp.FullName + '\\bepinex.zip'); Expand-Archive -Force ($tmp.FullName + '\\bepinex.zip') ($tmp.FullName + '\\bepinex'); $src=$tmp.FullName + '\\bepinex\\BepInExPack'; if (!(Test-Path $src)) { $src=$tmp.FullName + '\\bepinex' }; Copy-Item -Recurse -Force ($src + '\\*') .; Invoke-WebRequest -Uri 'https://thunderstore.io/package/download/nebula/NebulaMultiplayerModApi/2.1.0/' -OutFile ($tmp.FullName + '\\api.zip'); Expand-Archive -Force ($tmp.FullName + '\\api.zip') ($tmp.FullName + '\\api'); Copy-Item -Recurse -Force ($tmp.FullName + '\\api\\plugins\\*') 'BepInEx\\plugins\\'; Invoke-WebRequest -Uri 'https://thunderstore.io/package/download/nebula/NebulaMultiplayerMod/0.9.16/' -OutFile ($tmp.FullName + '\\nebula.zip'); Expand-Archive -Force ($tmp.FullName + '\\nebula.zip') ($tmp.FullName + '\\nebula'); Copy-Item -Recurse -Force ($tmp.FullName + '\\nebula\\plugins\\*') 'BepInEx\\plugins\\'; Remove-Item -Recurse -Force $tmp.FullName\"",
+    "UpdateSourceArgs": "{{$FullRootDir}}install-dsp-nebula-v2.sh {{$FullBaseDir}} {{$FullRootDir}}",
     "SkipOnFailure": false
   }
 ]
