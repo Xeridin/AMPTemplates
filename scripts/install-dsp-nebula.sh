@@ -64,8 +64,12 @@ install_bepinex() {
 
   if [[ -d "$tmp/extract/BepInExPack" ]]; then
     cp -a "$tmp/extract/BepInExPack/." "$BASE_DIR/"
-  else
+  elif [[ -d "$tmp/extract/BepInEx" ]]; then
     cp -a "$tmp/extract/." "$BASE_DIR/"
+  else
+    echo "Could not identify BepInEx package layout." >&2
+    find "$tmp/extract" -maxdepth 3 -print >&2 || true
+    exit 66
   fi
 }
 
@@ -83,9 +87,24 @@ install_plugin_pack() {
   elif [[ -d "$tmp/extract/BepInEx/plugins" ]]; then
     cp -a "$tmp/extract/BepInEx/plugins/." "$BASE_DIR/BepInEx/plugins/"
   else
-    echo "Could not find plugins directory in $name package." >&2
-    find "$tmp/extract" -maxdepth 3 -type d -print >&2 || true
-    exit 65
+    mapfile -t payload_files < <(find "$tmp/extract" -type f \
+      ! -iname 'manifest.json' \
+      ! -iname 'icon.png' \
+      ! -iname 'README.md' \
+      ! -iname 'CHANGELOG.md' \
+      ! -iname '*.txt' \
+      ! -iname '*.md')
+
+    if (( ${#payload_files[@]} == 0 )); then
+      echo "Could not find plugin payload files in $name package." >&2
+      find "$tmp/extract" -maxdepth 4 -print >&2 || true
+      exit 65
+    fi
+
+    echo "No plugins directory found in $name package; copying payload files directly into BepInEx/plugins."
+    for file in "${payload_files[@]}"; do
+      cp -a "$file" "$BASE_DIR/BepInEx/plugins/"
+    done
   fi
 }
 
