@@ -13,9 +13,9 @@ mkdir -p "$BASE_DIR"
 cd "$BASE_DIR"
 mkdir -p BepInEx/plugins
 
-BEPINEX_URL="https://thunderstore.io/package/download/xiaoye97/BepInEx/5.4.17/"
-NEBULA_API_URL="https://thunderstore.io/package/download/nebula/NebulaMultiplayerModApi/2.1.0/"
-NEBULA_MOD_URL="https://thunderstore.io/package/download/nebula/NebulaMultiplayerMod/0.9.16/"
+BEPINEX_URL="https://thunderstore.io/package/download/xiaoye97/BepInEx/5.4.22/"
+NEBULA_API_URL="https://thunderstore.io/package/download/nebula/NebulaMultiplayerModApi/2.1.1/"
+NEBULA_MOD_URL="https://thunderstore.io/package/download/nebula/NebulaMultiplayerMod/0.9.17/"
 
 download() {
   local url="$1"
@@ -111,13 +111,13 @@ install_plugin_pack() {
 TMP_DIR="$(mktemp -d)"
 trap 'rm -rf "$TMP_DIR"' EXIT
 
-echo "Installing BepInEx..."
+echo "Installing BepInEx 5.4.22..."
 install_bepinex "$TMP_DIR"
 
-echo "Installing Nebula Multiplayer Mod API..."
+echo "Installing Nebula Multiplayer Mod API 2.1.1..."
 install_plugin_pack "nebula-api" "$NEBULA_API_URL" "$TMP_DIR"
 
-echo "Installing Nebula Multiplayer Mod..."
+echo "Installing Nebula Multiplayer Mod 0.9.17..."
 install_plugin_pack "nebula-mod" "$NEBULA_MOD_URL" "$TMP_DIR"
 
 if [[ -n "$ROOT_DIR" ]]; then
